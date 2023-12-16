@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using FinalV1;
 using FinalV1.Data;
+using FinalV1.Models;
+using FinalV1.ViewModels;
 
 namespace FinalV1.Controllers
 {
@@ -22,7 +24,7 @@ namespace FinalV1.Controllers
         // GET: Restaurant
         public async Task<IActionResult> Index()
         {
-            var menuContext = _context.Restaurant.Include(r => r.Menu);
+            var menuContext = _context.Restaurant.Include(r => r.Menus);
             return View(await menuContext.ToListAsync());
         }
 
@@ -35,7 +37,7 @@ namespace FinalV1.Controllers
             }
 
             var restaurant = await _context.Restaurant
-                .Include(r => r.Menu)
+                .Include(r => r.Menus)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (restaurant == null)
             {
@@ -48,7 +50,7 @@ namespace FinalV1.Controllers
         // GET: Restaurant/Create
         public IActionResult Create()
         {
-            ViewData["MenuId"] = new SelectList(_context.Menu, "Id", "Id");
+            ViewData["Menus"] = new SelectList(_context.Menu.ToList(), "Id", "Name");
             return View();
         }
 
@@ -57,18 +59,23 @@ namespace FinalV1.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name,Address,Phone,MenuId")] Restaurant restaurant)
+        public async Task<IActionResult> Create([Bind("Id,Name,Address,Phone,MenuIds")] RestaurantCreateVM restaurantVM)
         {
-            //TODO: Quitar y crear un viewmodel para restaurant
-            ModelState.Remove("Menu");
             if (ModelState.IsValid)
             {
+                var menus = _context.Menu.Where(x => restaurantVM.MenuIds.Contains(x.Id)).ToList();
+                var restaurant = new Restaurant
+                {
+                    Name = restaurantVM.Name,
+                    Address = restaurantVM.Address,
+                    Phone = restaurantVM.Phone,
+                    Menus = menus
+                };
                 _context.Add(restaurant);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["MenuId"] = new SelectList(_context.Menu, "Id", "Id", restaurant.MenuId);
-            return View(restaurant);
+            return View(restaurantVM);
         }
 
         // GET: Restaurant/Edit/5
@@ -133,7 +140,7 @@ namespace FinalV1.Controllers
             }
 
             var restaurant = await _context.Restaurant
-                .Include(r => r.Menu)
+                .Include(r => r.Menus)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (restaurant == null)
             {

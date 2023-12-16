@@ -66,25 +66,37 @@ namespace FinalV1.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("MenuId");
-
                     b.ToTable("Restaurant");
                 });
 
-            modelBuilder.Entity("FinalV1.Restaurant", b =>
+            modelBuilder.Entity("MenuRestaurant", b =>
                 {
-                    b.HasOne("FinalV1.Models.Menu", "Menu")
-                        .WithMany("Restaurants")
-                        .HasForeignKey("MenuId")
+                    b.Property<int>("MenusId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("RestaurantsId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("MenusId", "RestaurantsId");
+
+                    b.HasIndex("RestaurantsId");
+
+                    b.ToTable("MenuRestaurant");
+                });
+
+            modelBuilder.Entity("MenuRestaurant", b =>
+                {
+                    b.HasOne("FinalV1.Models.Menu", null)
+                        .WithMany()
+                        .HasForeignKey("MenusId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Menu");
-                });
-
-            modelBuilder.Entity("FinalV1.Models.Menu", b =>
-                {
-                    b.Navigation("Restaurants");
+                    b.HasOne("FinalV1.Restaurant", null)
+                        .WithMany()
+                        .HasForeignKey("RestaurantsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

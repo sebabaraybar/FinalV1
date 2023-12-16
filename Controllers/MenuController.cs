@@ -78,6 +78,7 @@ namespace FinalV1.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,Name,Price,Type,IsVegetarian,Calories")] Menu menu)
         {
+            ModelState.Remove("Restaurants");
             if (ModelState.IsValid)
             {
                 _context.Add(menu);

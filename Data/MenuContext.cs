@@ -21,8 +21,9 @@ namespace FinalV1.Data
         {
             modelBuilder.Entity<Menu>()
             .HasMany(r => r.Restaurants)
-            .WithOne(m => m.Menu)
-            .HasForeignKey(r => r.MenuId);
+            .WithMany(m => m.Menus)
+            .UsingEntity("MenuRestaurant");
+            //Tabla intermedia que vincula los ids de las dos tablas
         }
     }
 }
